@@ -1,0 +1,32 @@
+package com.xpxp.properties;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+/*
+ * 😊😊😊😊😊😊😊😊😊😊😊😊
+ * @file JwtProperties
+ * @author thexpxp233
+ * @date 2025/11/18
+ * My name is lixiaopei
+ **/
+@Component
+@ConfigurationProperties(prefix = "flower.jwt")
+@Data
+public class JwtProperties {
+    /**
+     * 管理端员工生成jwt令牌相关配置
+     */
+    private String adminSecretKey;
+    private long adminTtl;
+    private String adminTokenName;
+
+    /**
+     * 用户生成jwt令牌相关配置
+     */
+    private String userSecretKey;
+    private long userTtl;
+    private String userTokenName;
+
+}

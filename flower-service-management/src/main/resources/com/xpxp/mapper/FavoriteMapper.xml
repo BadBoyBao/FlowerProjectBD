@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.FavoriteMapper">
+
+    <insert id="addFavorite">
+        insert into favorites (flower_id, user_id)
+        values (#{flowerId}, #{userId})
+    </insert>
+    <delete id="deleteFavorite">
+        delete from favorites
+        where user_id = #{userId}
+        and flower_id in
+        <foreach item="flowerId" collection="flowerId" separator="," close=")" open="(" index="">
+            #{flowerId}
+        </foreach>
+    </delete>
+    <select id="allList" resultType="com.xpxp.VO.FavoritesVO">
+        SELECT fav.favorite_id,
+               fav.created_at                                   AS collect_time,  -- 收藏时间
+               f.flower_id,
+               f.flower_name,
+               f.main_image,
+               f.price,
+               f.tags,
+               f.meaning,
+               f.season,
+               f.status                                         AS flower_status, -- 鲜花状态
+               s.shop_id,
+               c.category_name,
+               s.shop_name,
+               s.shop_logo,
+               s.rating                                         AS shop_rating,
+               IFNULL(i.stock_quantity, 0)                      AS stock_quantity,
+               IFNULL(i.sold_quantity, 0)                       AS sold_quantity,
+               -- 计算字段：根据状态和库存判断是否可购买
+               CASE
+                   WHEN f.status = 0 THEN '已下架'
+                   WHEN IFNULL(i.stock_quantity, 0) &lt;= 0 THEN '已售罄'
+                   ELSE '可购买'
+                   END                                          AS purchase_status,
+               -- 格式化收藏时间
+               DATE_FORMAT(fav.created_at, '%Y-%m-%d %H:%i:%s') AS formatted_collect_time,
+               -- 时间差，显示"XX天前收藏"
+               TIMESTAMPDIFF(DAY, fav.created_at, NOW())        AS days_since_collect
+        FROM favorites fav
+                 LEFT JOIN flowers f ON fav.flower_id = f.flower_id
+                 LEFT JOIN category c ON f.category_id = c.category_id
+                 LEFT JOIN shops s ON f.shop_id = s.shop_id
+                 LEFT JOIN flowers_inventory i ON f.flower_id = i.flower_id
+        WHERE fav.user_id = #{userId} -- 使用当前用户的ID
+        ORDER BY fav.created_at DESC -- 按收藏时间倒序，最新的在前
+    </select>
+    <select id="getByFlowerId" resultType="com.xpxp.VO.FavoritesVO">
+        SELECT fav.favorite_id,
+               fav.created_at                                   AS collect_time,  -- 收藏时间
+               f.flower_id,
+               f.flower_name,
+               f.main_image,
+               f.price,
+               f.tags,
+               f.meaning,
+               f.season,
+               f.status                                         AS flower_status, -- 鲜花状态
+               s.shop_id,
+               c.category_name,
+               s.shop_name,
+               s.shop_logo,
+               s.rating                                         AS shop_rating,
+               IFNULL(i.stock_quantity, 0)                      AS stock_quantity,
+               IFNULL(i.sold_quantity, 0)                       AS sold_quantity,
+               -- 计算字段：根据状态和库存判断是否可购买
+               CASE
+                   WHEN f.status = 0 THEN '已下架'
+                   WHEN IFNULL(i.stock_quantity, 0) &lt;= 0 THEN '已售罄'
+                   ELSE '可购买'
+                   END                                          AS purchase_status,
+               -- 格式化收藏时间
+               DATE_FORMAT(fav.created_at, '%Y-%m-%d %H:%i:%s') AS formatted_collect_time,
+               -- 时间差，显示"XX天前收藏"
+               TIMESTAMPDIFF(DAY, fav.created_at, NOW())        AS days_since_collect
+        FROM favorites fav
+                 LEFT JOIN flowers f ON fav.flower_id = f.flower_id
+                 LEFT JOIN category c ON f.category_id = c.category_id
+                 LEFT JOIN shops s ON f.shop_id = s.shop_id
+                 LEFT JOIN flowers_inventory i ON f.flower_id = i.flower_id
+        WHERE fav.user_id = #{userId}
+          AND fav.flower_id = #{flowerId} -- 使用当前用户的ID
+        ORDER BY fav.created_at DESC -- 按收藏时间倒序，最新的在前
+    </select>
+</mapper>

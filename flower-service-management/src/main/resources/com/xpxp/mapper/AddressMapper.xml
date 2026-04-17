@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.AddressMapper">
+
+    <insert id="addAddress">
+        insert into addresses
+            (user_id, receiver_name, receiver_phone, detail_address, is_default)
+        values (#{userId}, #{addressAddDTO.name}, #{addressAddDTO.phone}, #{addressAddDTO.detail},
+                #{addressAddDTO.isDefault})
+    </insert>
+    <update id="updateAllToNonDefault">
+        update addresses
+        set is_default = 0
+        where user_id = #{userId}
+    </update>
+    <update id="updateAddress">
+        update addresses
+        set receiver_name  = #{addresses.receiverName},
+            receiver_phone = #{addresses.receiverPhone},
+            detail_address = #{addresses.detailAddress},
+            is_default     = #{addresses.isDefault}
+        where address_id = #{addresses.addressId}
+          and user_id = #{userId}
+    </update>
+</mapper>

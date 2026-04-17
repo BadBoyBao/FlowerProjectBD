@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.InventoryMapper">
+
+
+    <!--查询库存-->
+    <select id="page" resultType="com.xpxp.entity.FlowersInventory">
+        select *
+        from flowers_inventory
+        where shop_id = #{shopId}
+    </select>
+    <select id="getFlowerInventory" resultType="com.xpxp.entity.FlowersInventory">
+        select *
+        from flowers_inventory
+        where flower_id = #{flowerId}
+    </select>
+
+    <!--新加库存-->
+    <insert id="addInitInventory">
+        insert into flowers_inventory
+            (flower_id, stock_quantity, sold_quantity, safety_stock, shop_id)
+        values (#{flowerId}, #{stockQuantity}, #{soldQuantity}, #{safetyStock}, #{shopId})
+    </insert>
+    <!--减少库存-->
+    <update id="updateInventory">
+        update flowers_inventory
+        set stock_quantity = stock_quantity - #{quantity}
+        where flower_id = #{flowerId}
+    </update>
+    <!--返回库存-->
+    <update id="increaseInventory">
+        update flowers_inventory
+        set stock_quantity = stock_quantity + #{quantity}
+        where flower_id = #{flowerId}
+    </update>
+
+
+    <!--增加鲜花销售量-->
+    <update id="AddSold">
+        update flowers_inventory
+        set sold_quantity = sold_quantity + #{quantity}
+        where flower_id = #{flowerId}
+    </update>
+    <update id="updateByShopId">
+        UPDATE flowers_inventory
+        <set>
+            <if test="stockQuantity != null">
+                stock_quantity = #{stockQuantity},
+            </if>
+            <if test="safetyStock != null">
+                safety_stock = #{safetyStock},
+            </if>
+        </set>
+        WHERE shop_id = #{shopId}
+        AND flower_id = #{flowerId}
+    </update>
+
+</mapper>

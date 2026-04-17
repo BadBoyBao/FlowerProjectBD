@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.ShopMapper">
+
+    <insert id="addOwner">
+        INSERT INTO users (username, password, phone, nickname, gender, image, role, is_shop_owner)
+        VALUES (#{username}, #{password}, #{phone}, #{nickname}, #{gender}, #{image}, #{role}, #{isShopOwner})
+    </insert>
+
+
+    <select id="getAll" resultType="com.xpxp.VO.OwnerVO">
+        SELECT user_id, username, nickname, phone, image, created_at, is_shop_owner
+        FROM users
+        WHERE role = 'SHOP_OWNER'
+    </select>
+    <select id="page" resultType="com.xpxp.VO.OwnerVO">
+        SELECT user_id, username, nickname, phone, image, created_at, is_shop_owner
+        FROM users
+        WHERE role = 'SHOP_OWNER'
+        order by created_at desc
+    </select>
+
+
+    <insert id="addShop" useGeneratedKeys="true" keyProperty="shopId">
+        INSERT INTO shops (shop_name, shop_description, owner_id, contact_phone, contact_address, shop_logo,
+                           shop_banner, status, business_hours)
+        VALUES (#{shopName}, #{shopDescription}, #{ownerId}, #{contactPhone}, #{contactAddress}, #{shopLogo},
+                #{shopBanner}, #{status}, #{businessHours})
+    </insert>
+    <update id="updateUser">
+        UPDATE users
+        SET shop_id = #{shopId}
+        WHERE user_id = #{userId}
+    </update>
+
+
+    <select id="getAllShop" resultType="com.xpxp.entity.Shops">
+        SELECT shop_id,
+               shop_name,
+               shop_description,
+               owner_id,
+               contact_phone,
+               contact_address,
+               shop_logo,
+               shop_banner,
+               status,
+               business_hours,
+               rating,
+               total_sales,
+               created_at,
+               updated_at,
+               ban_reason
+        FROM shops
+        order by created_at desc
+    </select>
+    <select id="GetShopList" resultType="com.xpxp.VO.ShopVO">
+        SELECT shop_id,
+               shop_name,
+               shop_description,
+               shop_logo,
+               shop_banner
+        FROM shops
+        ORDER BY total_sales DESC
+        LIMIT 5
+    </select>
+    <select id="getList" resultType="com.xpxp.VO.ShopViewVO">
+        SELECT shop_id,
+               shop_name,
+               shop_description,
+               shop_logo,
+               shop_banner,
+               status,
+               business_hours,
+               rating,
+               total_sales,
+               ban_reason
+        FROM shops
+    </select>
+
+    <!-- 添加查询店铺鲜花列表的SQL -->
+    <select id="getFlowersByShopId" resultType="com.xpxp.VO.FlowerVO">
+        SELECT flower_id,
+               flower_name,
+               price,
+               main_image
+        FROM flowers
+        WHERE shop_id = #{shopId}
+    </select>
+
+    <!-- 或者使用关联查询一次性获取所有数据 -->
+    <select id="getListWithFlowers" resultType="com.xpxp.VO.ShopViewVO">
+        SELECT s.shop_id,
+               s.shop_name,
+               s.shop_description,
+               s.shop_logo,
+               s.shop_banner,
+               s.status,
+               s.business_hours,
+               s.rating,
+               s.total_sales,
+               f.flower_id,
+               f.flower_name,
+               f.price,
+               f.main_image
+        FROM shops s
+                 LEFT JOIN flowers f ON s.shop_id = f.shop_id
+    </select>
+    <select id="getShopDetail" resultType="com.xpxp.VO.ShopDetailVO">
+        SELECT shop_id,
+               shop_name,
+               shop_description,
+               shop_logo,
+               shop_banner,
+               status,
+               business_hours,
+               rating,
+               total_sales
+        FROM shops
+        WHERE shop_id = #{shopId}
+    </select>
+    <select id="getShopInfo" resultType="com.xpxp.VO.ShopDetailInfoVO">
+        SELECT u.nickname        AS owner_name,
+               u.phone           AS owner_phone,
+               s.shop_id,
+               s.shop_name,
+               s.shop_description,
+               s.shop_logo,
+               s.business_hours,
+               s.status,
+               s.contact_phone   AS shop_phone,
+               s.contact_address AS shop_address
+        FROM shops s
+                 JOIN users u ON s.owner_id = u.user_id
+        WHERE s.shop_id = #{shopId}
+    </select>
+
+    <update id="updateShop">
+        UPDATE shops
+        <set>
+            <if test="shopName != null and shopName != ''">
+                shop_name = #{shopName},
+            </if>
+            <if test="shopDescription != null and shopDescription != ''">
+                shop_description = #{shopDescription},
+            </if>
+            <if test="shopLogo != null and shopLogo != ''">
+                shop_logo = #{shopLogo},
+            </if>
+            <if test="businessHours != null and businessHours != ''">
+                business_hours = #{businessHours},
+            </if>
+            <if test="shopPhone != null and shopPhone != ''">
+                contact_phone = #{shopPhone},
+            </if>
+            <if test="shopAddress != null and shopAddress != ''">
+                contact_address = #{shopAddress},
+            </if>
+            updated_at = NOW()
+        </set>
+        WHERE shop_id = #{shopId}
+    </update>
+    <update id="banShop">
+        UPDATE shops
+        SET status     = 2,
+            ban_reason = #{banReason}
+        WHERE shop_id = #{shopId}
+    </update>
+    <update id="unbanShop">
+        UPDATE shops
+        SET status     = 0,
+            ban_reason = null
+        WHERE shop_id = #{shopId}
+    </update>
+    <update id="updateShopByShopId">
+        UPDATE shops
+        <set>
+            <if test="shopName != null and shopName != ''">
+                shop_name = #{shopName},
+            </if>
+            <if test="shopLogo != null and shopLogo != ''">
+                shop_logo = #{shopLogo},
+            </if>
+            <if test="businessHours != null and businessHours != ''">
+                business_hours = #{businessHours},
+            </if>
+            <if test="contactPhone != null and contactPhone != ''">
+                contact_phone = #{contactPhone},
+            </if>
+            <if test="contactAddress != null and contactAddress != ''">
+                contact_address = #{contactAddress},
+            </if>
+            <if test="rating != null">
+                rating = #{rating},
+            </if>
+            updated_at = NOW()
+        </set>
+        WHERE shop_id = #{shopId}
+    </update>
+
+</mapper>

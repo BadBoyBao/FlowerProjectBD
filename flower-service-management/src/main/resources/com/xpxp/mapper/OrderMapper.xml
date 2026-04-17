@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.OrderMapper">
+
+    <insert id="submitOrder" keyProperty="orderId" useGeneratedKeys="true">
+        insert into orders
+        (order_no, user_id, total_amount, final_amount, shipping_address, receiver_name, receiver_phone)
+        values (#{orderNo}, #{userId}, #{totalAmount}, #{finalAmount}, #{shippingAddress}, #{receiverName},
+                #{receiverPhone})
+    </insert>
+
+    <insert id="addOrderItems">
+        insert into order_items
+        (order_id, flower_id, flower_name, flower_image, unit_price, quantity, subtotal, shop_id, shop_status)
+        values (#{orderId}, #{submit.flowerId}, #{submit.flowerName}, #{submit.flowerImage}, #{submit.unitPrice},
+                #{submit.quantity}, #{submit.subtotal}, #{submit.shopId}, 0)
+    </insert>
+
+
+    <select id="listResult" resultType="com.xpxp.entity.Orders">
+        select *
+        from orders
+        where user_id = #{userId}
+          and order_status = 0
+    </select>
+    <select id="getOrderByUserId" resultType="com.xpxp.entity.Orders">
+        select *
+        from orders
+        where user_id = #{userId}
+          and order_status = 0
+    </select>
+
+
+    <update id="confirmOrder">
+        update orders
+        <set>
+            <if test="orders.totalAmount != null">
+                total_amount = #{orders.totalAmount},
+            </if>
+            <if test="orders.shippingFee != null">
+                shipping_fee = #{orders.shippingFee},
+            </if>
+            <if test="orders.finalAmount != null">
+                final_amount = #{orders.finalAmount},
+            </if>
+            <if test="orders.paymentMethod != null">
+                payment_method = #{orders.paymentMethod},
+            </if>
+            <if test="orders.shippingAddress != null and orders.shippingAddress != ''">
+                shipping_address = #{orders.shippingAddress},
+            </if>
+            <if test="orders.receiverName != null and orders.receiverName != ''">
+                receiver_name = #{orders.receiverName},
+            </if>
+            <if test="orders.receiverPhone != null and orders.receiverPhone != ''">
+                receiver_phone = #{orders.receiverPhone},
+            </if>
+            <if test="orders.orderNotes != null">
+                order_notes = #{orders.orderNotes},
+            </if>
+            <if test="orders.paymentStatus != null">
+                payment_status = #{orders.paymentStatus},
+            </if>
+            <if test="orders.orderStatus != null">
+                order_status = #{orders.orderStatus},
+            </if>
+            <if test="orders.updatedAt != null">
+                updated_at = #{orders.updatedAt}
+            </if>
+        </set>
+        where order_id = #{orders.orderId} and user_id = #{userId}
+    </update>
+
+    <select id="orderList" resultType="com.xpxp.entity.Orders">
+        select o.order_id
+             , o.order_no
+             , o.total_amount
+             , o.shipping_fee
+             , o.final_amount
+             , o.payment_method
+             , o.payment_status
+             , o.order_status
+             , o.shipping_address
+             , o.receiver_name
+             , o.receiver_phone
+             , o.order_notes
+             , o.paid_time
+             , o.shipped_time
+             , o.completed_time
+             , o.cancelled_time
+             , o.created_at
+             , o.updated_at
+             , o.cancellation_reason
+             , o.rejection_reason
+        from orders o
+        where user_id = #{userId}
+        order by o.created_at desc
+    </select>
+    <select id="getOrderById" resultType="com.xpxp.entity.Orders">
+
+        select *
+        from orders
+        where order_id = #{orderId}
+          and user_id = #{userId}
+    </select>
+
+    <update id="update">
+        update orders
+        <set>
+            <if test="paymentMethod != null">
+                payment_method = #{paymentMethod},
+            </if>
+            <if test="paymentStatus != null">
+                payment_status = #{paymentStatus},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+            <if test="paidTime != null">
+                paid_time = #{paidTime},
+            </if>
+            <if test="updatedAt !=null">
+                updated_at = #{updatedAt}
+            </if>
+
+        </set>
+        where order_id = #{orderId} and user_id = #{userId}
+    </update>
+
+    <delete id="deleteOrderById">
+        delete
+        from orders
+        where order_id = #{orderId}
+          and user_id = #{userId}
+    </delete>
+    <delete id="deleteOrderItemsById">
+        delete
+        from order_items
+        where order_id = #{orderId}
+    </delete>
+
+    <select id="page" resultType="com.xpxp.VO.OrdersVO">
+        select
+        DISTINCT
+        o.order_id, o.user_id,o.order_no, o.payment_status, o.order_status,o.order_notes,
+        o.created_at,o.receiver_name,o.shipping_address,o.receiver_phone,o.shipping_fee,o.total_amount,o.final_amount,
+        oi.shop_status
+        from orders o
+        INNER JOIN order_items oi ON o.order_id = oi.order_id
+        <where>
+            <if test="shopId != null">
+                oi.shop_id = #{shopId}
+            </if>
+            <if test="orderStatus != null">
+                AND o.order_status = #{orderStatus}
+            </if>
+        </where>
+        order by o.created_at desc
+    </select>
+    <select id="getOrderByOrderId" resultType="com.xpxp.entity.Orders">
+        select o.order_id, o.order_status, o.payment_status, o.receiver_name, o.shipping_address, o.receiver_phone
+        from orders o
+        where order_id = #{orderId}
+    </select>
+
+
+    <update id="updateByOrderId">
+        UPDATE orders
+        <set>
+            <if test="totalAmount != null and shippingFee != ''">
+                total_amount = #{totalAmount},
+            </if>
+            <if test="shippingFee != null and shippingFee != ''">
+                shipping_fee = #{shippingFee},
+            </if>
+            <if test="finalAmount != null and finalAmount != ''">
+                final_amount = #{finalAmount},
+            </if>
+            <if test="paymentMethod != null">
+                payment_method = #{paymentMethod},
+            </if>
+            <if test="paymentStatus != null">
+                payment_status = #{paymentStatus},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+            <if test="shippingAddress != null and shippingAddress != ''">
+                shipping_address = #{shippingAddress},
+            </if>
+            <if test="receiverName != null and receiverName != ''">
+                receiver_name = #{receiverName},
+            </if>
+            <if test="receiverPhone != null and receiverPhone != ''">
+                receiver_phone = #{receiverPhone},
+            </if>
+            <if test="orderNotes != null">
+                order_notes = #{orderNotes},
+            </if>
+            <if test="paidTime != null">
+                paid_time = #{paidTime},
+            </if>
+            <if test="shippedTime != null">
+                shipped_time = #{shippedTime},
+            </if>
+            <if test="completedTime != null">
+                completed_time = #{completedTime},
+            </if>
+            <if test="cancelledTime != null">
+                cancelled_time = #{cancelledTime},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt},
+            </if>
+
+            updated_at = NOW(),
+
+            <if test="rejectionReason != null">
+                rejection_reason = #{rejectionReason},
+            </if>
+            <if test="cancellationReason != null">
+                cancellation_reason = #{cancellationReason}
+            </if>
+        </set>
+        WHERE order_id = #{orderId}
+    </update>
+    <select id="CountStatus" resultType="com.xpxp.VO.OrderStatusCountVO">
+        SELECT o.order_status, COUNT(DISTINCT o.order_id) AS count
+        FROM orders o
+                 INNER JOIN order_items oi ON o.order_id = oi.order_id
+        WHERE oi.shop_id = #{shopId}
+        GROUP BY o.order_status
+    </select>
+    <select id="getOrderDetail" resultType="com.xpxp.VO.OrderItemVO">
+        select o.order_item_id,
+               o.order_id,
+               o.flower_id,
+               o.flower_name,
+               o.flower_image,
+               o.unit_price,
+               o.quantity,
+               o.subtotal,
+               o.created_at,
+               o.shop_id,
+               o.shop_status,
+               o.shop_updated_at,
+               s.shop_name
+        from order_items o
+                 LEFT JOIN shops s ON o.shop_id = s.shop_id
+        where order_id = #{orderId}
+    </select>
+    <select id="getOrderItemsByOrderIdAndShopId" resultType="com.xpxp.VO.OrderItemVO">
+        select o.order_item_id,
+               o.order_id,
+               o.flower_id,
+               o.flower_name,
+               o.flower_image,
+               o.unit_price,
+               o.quantity,
+               o.subtotal,
+               o.created_at,
+               o.shop_id,
+               o.shop_status,
+               o.shop_updated_at,
+               s.shop_name
+        from order_items o
+                 LEFT JOIN shops s ON o.shop_id = s.shop_id
+        where o.order_id = #{orderId}
+          and o.shop_id = #{shopId}
+    </select>
+    <select id="getOrderItemsByOrderId" resultType="com.xpxp.entity.OrderItems">
+        select *
+        from order_items
+        where order_id = #{orderId}
+    </select>
+    <insert id="review">
+        insert into reviews (user_id, order_id, flower_id, rating, content)
+        values (#{userId}, #{orderReviewDTO.orderId}, #{orderReviewDTO.flowerId}, #{orderReviewDTO.rating},
+                #{orderReviewDTO.content})
+
+    </insert>
+
+</mapper>

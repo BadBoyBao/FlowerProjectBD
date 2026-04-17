@@ -1,0 +1,47 @@
+server:
+  port: 8080
+spring:
+  profiles:
+    active: dev
+    #移除敏感信息，完全让dev来配置
+  # 文件大小上传限制配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+#Mybatis相关配置
+mybatis:
+  configuration:
+    #开启驼峰命名开关
+    map-underscore-to-camel-case: true
+    #配置事务管理日志级别
+logging:
+  level:
+    com.xpxp: INFO
+    org.apache.ibatis: WARN  # 将MyBatis日志级别调高，减少输出
+    org.springframework.jdbc.support.JdbcTransactionManager: DEBUG
+
+
+#jwt配置
+flower:
+  jwt:
+    user-secret-key: ${flower.jwt.key}
+    user-ttl: ${flower.jwt.ttl}
+    user-token-name: ${flower.jwt.name}
+#简单上传配置
+dromara:
+  x-file-storage: #文件存储配置
+    default-platform: minio-1 #默认使用的存储平台
+    thumbnail-suffix: ".min.jpg" #缩略图后缀，例如【.min.jpg】【.png】
+    #对应平台的配置写在这里，注意缩进要对齐
+    #minio配置
+    minio:
+      - platform: minio-1 # 存储平台标识
+        enable-storage: true  # 启用存储
+        access-key: ${flower.minio.access}
+        secret-key: ${flower.minio.secret}
+        bucket-name: ${flower.minio.bucket}
+        end-point: ${flower.minio.endpoint}
+        domain: ${flower.minio.domain}
+        base-path: ${flower.minio.basepath}

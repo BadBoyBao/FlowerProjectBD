@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.UserFlowerMapper">
+
+    <!--统计销量前5的鲜花-->
+    <select id="getRecommendFlowers" resultType="com.xpxp.VO.FlowerRecommendVO">
+        SELECT f.flower_id,
+               f.flower_name,
+               f.price,
+               fi.sold_quantity,
+               f.main_image as image,
+               f.shop_id
+        FROM flowers f
+                 JOIN
+             flowers_inventory fi ON f.flower_id = fi.flower_id
+        WHERE f.status = 1
+        ORDER BY fi.sold_quantity DESC
+        LIMIT 5;
+
+    </select>
+
+    <!--根据分类id查询-->
+    <select id="listByCategory" resultType="com.xpxp.VO.UserFlowerVO">
+        SELECT f.flower_id,
+        f.flower_name,
+        f.price,
+        f.main_image,
+        f.description,
+        f.tags,
+        f.season,
+        f.meaning,
+        f.care_tips,
+        f.status,
+        fi.stock_quantity,
+        fi.sold_quantity,
+        fi.safety_stock
+        FROM flowers f
+        JOIN flowers_inventory fi ON f.flower_id = fi.flower_id
+        <where>
+            <if test="categoryId != null and categoryId != '' ">
+                f.category_id = #{categoryId}
+            </if>
+            AND f.status = 1
+        </where>
+        ORDER BY f.updated_at DESC
+    </select>
+
+    <!--鲜花名称模糊查询-->
+    <select id="listByFlowerName" resultType="com.xpxp.VO.UserFlowerVO">
+        SELECT f.flower_id,
+        f.flower_name,
+        f.price,
+        f.main_image,
+        f.description,
+        f.tags,
+        f.season,
+        f.meaning,
+        f.care_tips,
+        f.status,
+        fi.stock_quantity,
+        fi.sold_quantity,
+        fi.safety_stock
+        FROM flowers f
+        JOIN flowers_inventory fi ON f.flower_id = fi.flower_id
+        <where>
+            <if test="flowerName != null and flowerName != '' ">
+                f.flower_name LIKE CONCAT('%', #{flowerName}, '%')
+            </if>
+            AND f.status = 1
+        </where>
+        ORDER BY f.updated_at DESC
+    </select>
+
+    <select id="getFlowerById" resultType="com.xpxp.VO.FlowerDetailVO">
+        SELECT f.flower_id,
+               f.flower_name,
+               f.category_id,
+               f.price,
+               f.main_image,
+               f.description,
+               f.tags,
+               f.season,
+               f.meaning,
+               f.care_tips,
+               fi.stock_quantity,
+               fi.sold_quantity,
+               s.shop_id,
+               s.shop_name,
+               COUNT(fav.favorite_id) AS favoriteCount
+        FROM flowers f
+                 JOIN
+             flowers_inventory fi
+             ON f.flower_id = fi.flower_id
+                 JOIN shops s ON f.shop_id = s.shop_id
+                 LEFT JOIN favorites fav ON f.flower_id = fav.flower_id
+        WHERE f.flower_id = #{flowerId}
+          AND f.status = 1
+    </select>
+    <select id="listByShopIdAndCategoryId" resultType="com.xpxp.VO.FlowerVO">
+        select
+        f.shop_id,
+        f.flower_id,
+        f.flower_name,
+        f.price,
+        f.main_image,
+        fi.stock_quantity as stock,
+        fi.sold_quantity as sold,
+        f.status
+        from flowers f join flowers_inventory fi on f.flower_id = fi.flower_id
+        <where>
+            f.shop_id = #{shopId}
+            <if test="categoryId != null and categoryId != '' ">
+                AND f.category_id = #{categoryId}
+            </if>
+            AND f.status = 1
+        </where>
+        ORDER BY f.updated_at DESC
+    </select>
+    <!--    <select id="listResult" resultType="com.xpxp.VO.FlowerListVO">-->
+    <!--        SELECT-->
+    <!--        f.flower_id AS flowerId,-->
+    <!--        f.flower_name AS flowerName,-->
+    <!--        f.main_image AS mainImage,-->
+    <!--        f.price,-->
+    <!--        f.tags,-->
+    <!--        f.meaning,-->
+    <!--        f.season,-->
+    <!--        c.category_name AS categoryName,-->
+    <!--        f.shop_id AS shopId,-->
+    <!--        s.shop_name AS shopName,-->
+    <!--        s.rating,-->
+    <!--        IFNULL(i.stock_quantity, 0) AS stockQuantity,-->
+    <!--        IFNULL(i.sold_quantity, 0) AS soldQuantity,-->
+    <!--        CASE-->
+    <!--        WHEN f.status = 0 THEN '下架'-->
+    <!--        WHEN f.status = 1 THEN '上架'-->
+    <!--        ELSE '未知'-->
+    <!--        END AS status,-->
+    <!--        DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') AS createAt,-->
+    <!--        COUNT(fav.favorite_id) AS collectCount-->
+    <!--        FROM flowers f-->
+    <!--        LEFT JOIN category c ON f.category_id = c.category_id-->
+    <!--        LEFT JOIN shops s ON f.shop_id = s.shop_id-->
+    <!--        LEFT JOIN flowers_inventory i ON f.flower_id = i.flower_id-->
+    <!--        LEFT JOIN favorites fav ON f.flower_id = fav.flower_id-->
+    <!--        <where>-->
+    <!--            &lt;!&ndash; 基础条件：只查询上架的鲜花 &ndash;&gt;-->
+    <!--            f.status = 1-->
+
+    <!--            &lt;!&ndash; 动态条件：鲜花名称模糊查询 &ndash;&gt;-->
+    <!--            <if test="flowerName != null and flowerName != ''">-->
+    <!--                AND f.flower_name LIKE CONCAT('%', #{flowerName}, '%')-->
+    <!--            </if>-->
+
+    <!--            &lt;!&ndash; 动态条件：分类名称模糊查询 &ndash;&gt;-->
+    <!--            <if test="categoryName != null and categoryName != ''">-->
+    <!--                AND c.category_name LIKE CONCAT('%', #{categoryName}, '%')-->
+    <!--            </if>-->
+
+    <!--            <if test="tag != null and tag != ''">-->
+    <!--                AND f.tags LIKE CONCAT('%', #{tag}, '%')-->
+    <!--            </if>-->
+    <!--        </where>-->
+    <!--        GROUP BY f.flower_id, f.flower_name, f.main_image, f.price, f.tags,-->
+    <!--        f.meaning, f.season, c.category_name, f.shop_id, s.shop_name,-->
+    <!--        s.rating, i.stock_quantity, i.sold_quantity, f.status, f.created_at-->
+    <!--        ORDER BY f.created_at DESC-->
+    <!--    </select>-->
+    <select id="listResult" resultType="com.xpxp.VO.FlowerListVO">
+        SELECT
+        f.flower_id AS flowerId,
+        f.flower_name AS flowerName,
+        f.main_image AS mainImage,
+        f.price,
+        f.tags,
+        f.meaning,
+        f.season,
+        c.category_name AS categoryName,
+        f.shop_id AS shopId,
+        s.shop_name AS shopName,
+        s.rating,
+        IFNULL(i.stock_quantity, 0) AS stockQuantity,
+        IFNULL(i.sold_quantity, 0) AS soldQuantity,
+        CASE
+        WHEN f.status = 0 THEN '下架'
+        WHEN f.status = 1 THEN '上架'
+        ELSE '未知'
+        END AS status,
+        DATE_FORMAT(f.created_at, '%Y-%m-%d %H:%i:%s') AS createAt,
+        COUNT(fav.favorite_id) AS collectCount
+        FROM flowers f
+        LEFT JOIN category c ON f.category_id = c.category_id
+        LEFT JOIN shops s ON f.shop_id = s.shop_id
+        LEFT JOIN flowers_inventory i ON f.flower_id = i.flower_id
+        LEFT JOIN favorites fav ON f.flower_id = fav.flower_id
+        <where>
+            <!-- 基础条件：只查询上架的鲜花 -->
+            f.status = 1
+
+            <!-- 动态条件：鲜花名称模糊查询 -->
+            <if test="flowerName != null and flowerName != ''">
+                AND f.flower_name LIKE CONCAT('%', #{flowerName}, '%')
+            </if>
+
+            <!-- 动态条件：分类名称模糊查询 -->
+            <if test="categoryName != null and categoryName != ''">
+                AND c.category_name LIKE CONCAT('%', #{categoryName}, '%')
+            </if>
+
+            <!-- 动态条件：标签查询 -->
+            <if test="tag != null and tag != ''">
+                AND f.tags LIKE CONCAT('%', #{tag}, '%')
+            </if>
+
+            <!-- 动态条件：价格范围查询（最低价） -->
+            <if test="minPrice != null">
+                AND f.price >= #{minPrice}
+            </if>
+
+            <!-- 动态条件：价格范围查询（最高价） -->
+            <if test="maxPrice != null">
+                AND f.price &lt;= #{maxPrice}
+            </if>
+        </where>
+        GROUP BY f.flower_id, f.flower_name, f.main_image, f.price, f.tags,
+        f.meaning, f.season, c.category_name, f.shop_id, s.shop_name,
+        s.rating, i.stock_quantity, i.sold_quantity, f.status, f.created_at
+        <!-- 动态排序 -->
+        <choose>
+            <when test="sortBy != null and sortBy == 'price_asc'">
+                ORDER BY f.price ASC
+            </when>
+            <when test="sortBy != null and sortBy == 'price_desc'">
+                ORDER BY f.price DESC
+            </when>
+            <when test="sortBy != null and sortBy == 'sales_desc'">
+                ORDER BY IFNULL(i.sold_quantity, 0) DESC
+            </when>
+            <when test="sortBy != null and sortBy == 'collect_desc'">
+                ORDER BY COUNT(fav.favorite_id) DESC
+            </when>
+            <otherwise>
+                ORDER BY f.created_at DESC
+            </otherwise>
+        </choose>
+    </select>
+    <select id="flowerReviews" resultType="com.xpxp.VO.ReviewListVO">
+        SELECT u.nickname,
+               u.image      as avatar,
+               r.content,
+               r.rating,
+               r.created_at as reviewTime
+        from reviews r
+                 left join users u on r.user_id = u.user_id
+        where flower_id = #{flowerId}
+    </select>
+    <select id="homeReview" resultType="com.xpxp.VO.HomeReviewVO">
+        select r.review_id,
+               r.flower_id,
+               f.flower_name,
+               u.nickname,
+               u.image as avatar,
+               r.created_at,
+               r.rating
+        from reviews r
+                 left join users u on r.user_id = u.user_id
+                 left join flowers f on r.flower_id = f.flower_id
+        order by r.created_at desc
+        limit 5
+    </select>
+
+
+</mapper>

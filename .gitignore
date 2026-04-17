@@ -1,0 +1,18 @@
+# 敏感配置文件
+application-dev.yml
+*dev*.yml
+# 环境配置文件
+.env
+.env.local
+.env.*.local
+
+# 日志文件
+logs/
+*.log
+
+# 编译输出
+target/
+# IDE配置
+.idea/
+*.iml
+.vscode/

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xpxp.mapper.FlowerMapper">
+
+    <select id="selectById" resultType="com.xpxp.entity.Flowers">
+        select *
+        from flowers
+        where flower_id = #{flowerId}
+    </select>
+
+
+    <insert id="addFlower" useGeneratedKeys="true" keyProperty="flowerId" keyColumn="flower_id">
+        INSERT INTO flowers (shop_id,
+                             flower_name,
+                             category_id,
+                             price,
+                             main_image,
+                             description,
+                             tags,
+                             season,
+                             meaning,
+                             care_tips)
+        VALUES (#{shopId},
+                #{flowerName},
+                #{categoryId},
+                #{price},
+                #{mainImage},
+                #{description},
+                #{tags},
+                #{season},
+                #{meaning},
+                #{careTips})
+    </insert>
+
+
+    <update id="updateFlower">
+        UPDATE flowers
+        <set>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="flowerName != null and flowerName != ''">flower_name = #{flowerName},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="tags != null and tags != ''">tags = #{tags},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="mainImage != null">main_image = #{mainImage},</if>
+            <if test="season != null and season != ''">season = #{season},</if>
+            <if test="meaning != null and meaning != ''">meaning = #{meaning},</if>
+            <if test="careTips != null and careTips != ''">care_tips = #{careTips},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE flower_id = #{flowerId}
+    </update>
+
+    <select id="page" resultType="com.xpxp.entity.Flowers">
+        select * from flowers
+        <where>
+            <if test="flowerName != null and flowerName != ''">
+                and flower_name like concat('%', #{flowerName}, '%')
+            </if>
+            <if test="shopId != null">
+                and shop_id = #{shopId}
+            </if>
+        </where>
+        order by updated_at desc
+    </select>
+
+</mapper>
