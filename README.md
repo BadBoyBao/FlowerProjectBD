@@ -34,33 +34,6 @@
 
 - MySQL 8.0.41
 
-## 项目结构
-
-```
-flower-project/
-├── flower-parent/          # 父工程依赖管理
-├── flower-common/          # 通用模块
-│   ├── Common/             # 通用类(Result, PageResult等)
-│   ├── Config/             # 配置类(DocConfig, RedisConfiguration等)
-│   ├── Utils/              # 工具类(JwtUtils, OrderNoUtils)
-│   ├── aop/                # AOP切面(LoggingAspect)
-│   ├── context/            # 上下文(BaseContext)
-│   ├── exception/          # 全局异常处理
-│   └── interceptor/        # JWT认证拦截器
-├── flower-pojo/            # 实体模块
-│   ├── entity/             # 数据库实体
-│   ├── DTO/                # 数据传输对象
-│   └── VO/                 # 视图对象
-├── flower-service-management/  # 业务逻辑模块
-│   ├── Controller/         # 控制层
-│   ├── Service/            # 服务层接口
-│   ├── Service/Impl/       # 服务层实现
-│   └── mapper/             # 数据访问层
-└── web/                    # 启动模块
-    ├── FlowerApplication.java
-    └── application.yml
-```
-
 ## 功能模块
 
 ### 用户端功能
@@ -88,7 +61,6 @@ flower-project/
 - [x] 店铺管理（创建/封禁）
 - [x] 店主管理
 - [x] 用户管理
-- [x] 系统日志查看
 
 ## 核心特性
 
@@ -107,51 +79,12 @@ flower-project/
 - MySQL 8.0+
 - Redis 7.0+
 
-### 数据库配置
-
-1. 创建数据库 `bak`
-2. 导入数据库脚本 `_localhost-2026_01_03_05_32_03-dump.sql`
-
-### 启动服务
-
-```bash
-# 进入项目目录
-cd flower-project
-
-# 编译项目
-mvn clean package -DskipTests
-
-# 启动服务
-java -jar web/target/web-1.0-SNAPSHOT.jar
-```
-
-### 前端启动
-
-```bash
-# 进入前端目录
-cd flower-project-Vue
-
-# 安装依赖
-npm install
-
-# 启动开发服务器
-npm run dev
-```
-
-## 访问地址
-
-- 后端API: http://localhost:8080
-- API文档: http://localhost:8080/doc.html
-- 前端页面: http://localhost:5173
 
 ## 默认测试账号
 
 | 用户名 | 密码 | 角色 | 说明 |
 |--------|------|------|------|
 | admin | 123456 | SUPER_ADMIN | 超级管理员 |
-| owner1 | 123456 | SHOP_OWNER | 店铺1店主 |
-| owner2 | 123456 | SHOP_OWNER | 店铺2店主 |
-| thexpxp123 | 123456 | USER | 普通用户 |
 
 ## 项目状态
 
